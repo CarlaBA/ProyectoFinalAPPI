@@ -11,91 +11,99 @@ namespace APPI
 {
     internal class MetodosProducto
     {
-       
+        static string conexion = "Data Source = DESKTOP-2FTHB12\\MSSQLSERVER1; Initial Catalog = SistemaGestion; Integrated Security = True; Connect Timeout = 30; Encrypt = False; TrustServerCertificate = False; ApplicationIntent = ReadWrite; MultiSubnetFailover = False";
+
         public static List<Producto> ObtenerProducto(long idUsuario)
         {
             
             List<Producto> productos = new List<Producto>();
-            
-            SqlCommand comando = new SqlCommand("SELECT * FROM Producto");
-            ConexionSql.conexionSql.GetCommand(comando);
-               
+            using (SqlConnection con = new SqlConnection(conexion))
+            {
+                con.Open();
+                SqlCommand comando = new SqlCommand("SELECT * FROM Producto WHERE @idUsuario=idUsuario",con);
+                comando.Parameters.AddWithValue("@IdUsuario", idUsuario);
 
                 SqlDataReader reader = comando.ExecuteReader();
-                if(reader.HasRows)
+                if (reader.HasRows)
                 {
-                    while(reader.Read())
-                    {
-                        Producto producto = new Producto();
-                        producto.Id = reader.GetInt64(0);
-                        producto.Descripciones = reader.GetString(1);
-                        producto.Costo = reader.GetDecimal(2);
-                        producto.PrecioVenta = reader.GetDecimal(3);
-                        producto.Stock = reader.GetInt32(4);
-                        producto.IdUsuario = reader.GetInt64(5);
+                    reader.Read();
 
-                        productos.Add(producto);
-                    }
-                } return productos;
+                    Producto producto = new Producto();
+                    producto.Id = reader.GetInt64(0);
+                    producto.Descripciones = reader.GetString(1);
+                    producto.Costo = reader.GetDecimal(2);
+                    producto.PrecioVenta = reader.GetDecimal(3);
+                    producto.Stock = reader.GetInt32(4);
+                    producto.IdUsuario = reader.GetInt64(5);
 
+                    productos.Add(producto);
+
+                }
+                return productos;
+            }
            
         }
 
 
 
-        public static bool CrearProducto(Producto producto)
+        public static Producto CrearProducto(Producto producto)
         {
-
-            SqlCommand comando = new SqlCommand("INSERT INTO Prodcuto (Descripciones, Costo, PrecioVenta, Stock, IdUsuario) VALUES (@Descripciones, @Costo, @PrecioVenta, @Stock, @IdUsuario )");
-            ConexionSql.conexionSql.GetCommand(comando);
-            comando.Parameters.AddWithValue("@Descripciones", producto.Descripciones);
-            comando.Parameters.AddWithValue("@Costo", producto.Costo);
-            comando.Parameters.AddWithValue("@PrecioVenta", producto.PrecioVenta);
-            comando.Parameters.AddWithValue("@Stock", producto.Stock);
-            comando.Parameters.AddWithValue("@IdUsuario", producto.IdUsuario);
-
-            comando.ExecuteNonQuery();
-            return true;
-
-        }
-
-        public static bool ModificarProducto(Producto producto)
-        {
-
-            SqlCommand comando = new SqlCommand("UPDATE Producto SET Descripciones = @Descripciones, Costo = @Costo, PrecioVenta = @PrecioVenta, Stock = @Stock WHERE id = @ID");
-            ConexionSql.conexionSql.GetCommand(comando);
-
-            comando.Parameters.AddWithValue("@Descripciones", producto.Descripciones);
-            comando.Parameters.AddWithValue("@Costo", producto.Costo);
-            comando.Parameters.AddWithValue("@PrecioVenta", producto.PrecioVenta);
-            comando.Parameters.AddWithValue("@Stock", producto.Stock);
-            comando.Parameters.AddWithValue("@ID", producto.Id);
-
-
-            int recordsAffected = comando.ExecuteNonQuery();
-
-
-
-
-            return true;
-
-
-        }
-
-        public static bool EliminarProducto(int id)
-        {
-
+            using (SqlConnection con = new SqlConnection(conexion))
             {
-                SqlCommand comando = new SqlCommand("DELETE ProductoVendido WHERE IdProducto = @ID");
-                comando.Parameters.AddWithValue("@ID", id);
+                con.Open();
+                SqlCommand comando = new SqlCommand("INSERT INTO Producto (Descripciones, Costo, PrecioVenta, Stock, IdUsuario) VALUES (@Descripciones, @Costo, @PrecioVenta, @Stock, @IdUsuario )",con);
+                
+                comando.Parameters.AddWithValue("@Descripciones", producto.Descripciones);
+                comando.Parameters.AddWithValue("@Costo", producto.Costo);
+                comando.Parameters.AddWithValue("@PrecioVenta", producto.PrecioVenta);
+                comando.Parameters.AddWithValue("@Stock", producto.Stock);
+                comando.Parameters.AddWithValue("@IdUsuario", producto.IdUsuario);
 
-                int recordsAffected = comando.ExecuteNonQuery();
+                comando.ExecuteNonQuery();
+                return producto;
+            }
+        }
 
-                SqlCommand comm = new SqlCommand("DELETE Producto WHERE Id = @ID");
+        public static Producto ModificarProducto(Producto producto)
+        {
+                using (SqlConnection con = new SqlConnection(conexion))
+                {
+                    con.Open();
+                    SqlCommand comando = new SqlCommand("UPDATE Producto SET Descripciones = @Descripciones, Costo = @Costo, PrecioVenta = @PrecioVenta, Stock = @Stock WHERE id = @ID",con);
+                    
 
-                recordsAffected = comm.ExecuteNonQuery();
+                    comando.Parameters.AddWithValue("@Descripciones", producto.Descripciones);
+                    comando.Parameters.AddWithValue("@Costo", producto.Costo);
+                    comando.Parameters.AddWithValue("@PrecioVenta", producto.PrecioVenta);
+                    comando.Parameters.AddWithValue("@Stock", producto.Stock);
+                    comando.Parameters.AddWithValue("@ID", producto.Id);
 
-                return true;
+
+                    int recordsAffected = comando.ExecuteNonQuery();
+
+
+
+
+                    return producto;
+                }
+
+        }
+
+        public static int EliminarProducto(int id)
+        {
+            using(SqlConnection con = new SqlConnection(conexion))
+            {
+                  con.Open();
+                  SqlCommand comando = new SqlCommand("DELETE ProductoVendido WHERE IdProducto = @ID",con);
+                  comando.Parameters.AddWithValue("@ID", id);
+
+                  int recordsAffected = comando.ExecuteNonQuery();
+
+                  SqlCommand comm = new SqlCommand("DELETE Producto WHERE Id = @ID",con);
+
+                  recordsAffected = comm.ExecuteNonQuery();
+
+                  return id;
 
 
             }
