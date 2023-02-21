@@ -8,9 +8,9 @@ namespace APPI.Controllers
     public class UsuarioController : ControllerBase
     {
         [HttpPut]
-        public bool PutUsuario(Usuario usuario)
+        public void PutUsuario(Usuario usuario)
         {
-            return MetodosUsuario.ModificarUsuario(usuario);
+            MetodosUsuario.ModificarUsuario(usuario);
         }
 
 

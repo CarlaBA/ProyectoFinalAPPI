@@ -20,7 +20,7 @@ namespace APPI.Controllers
         }
 
         [HttpDelete("{idProducto}")]
-        public void DeleteProducto(int idProducto)
+        public void DeleteProducto(long idProducto)
         {
             MetodosProducto.EliminarProducto(idProducto);
         }

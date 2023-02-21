@@ -89,7 +89,7 @@ namespace APPI
 
         }
 
-        public static int EliminarProducto(int id)
+        public static long EliminarProducto(long id)
         {
             using(SqlConnection con = new SqlConnection(conexion))
             {
