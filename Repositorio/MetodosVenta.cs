@@ -12,17 +12,17 @@ namespace APPI
     {
         static string conexion = "Data Source = DESKTOP-2FTHB12\\MSSQLSERVER1; Initial Catalog = SistemaGestion; Integrated Security = True; Connect Timeout = 30; Encrypt = False; TrustServerCertificate = False; ApplicationIntent = ReadWrite; MultiSubnetFailover = False";
 
-        public static List<Venta> TraerVentas(long id)
+        public static List<Venta> TraerVentas(long idUsuario)
         {
             
             List<Venta> listaObtenerVentas = new List<Venta>();
 
             using(SqlConnection con = new SqlConnection(conexion))
             {
-                con.Open();
-                SqlCommand comando = new SqlCommand ("SELECT * FROM Venta WHERE @Id = id");
-                comando.Parameters.AddWithValue("@Id", id);
                 
+                SqlCommand comando = new SqlCommand ("SELECT * FROM Venta WHERE @IdUsuario = idUsuario", con);
+                comando.Parameters.AddWithValue("@IdUsuario", idUsuario);
+                con.Open();
 
                 SqlDataReader reader = comando.ExecuteReader();
                 
@@ -44,40 +44,53 @@ namespace APPI
         }
 
 
-        public static void CargarVenta(List<Producto> productosVendidos, long idUsuario)
+        public static void CargarVenta(long idUsuario, List<Producto> productosVendidos)
         {
             Venta venta = new Venta();
             using (SqlConnection con = new SqlConnection(conexion))
             {
-                con.Open();
-                SqlCommand comando = new SqlCommand("INSERT INTO Venta ([Comentarios],[IdUsuario]) VALUES (@Comentarios,@IdUsuario)");
-                comando.Parameters.AddWithValue("@Comentarios", "");
-                comando.Parameters.AddWithValue("@IdUsuario", idUsuario);
-            
-                
-                comando.ExecuteNonQuery();
+                SqlCommand comando = new SqlCommand();
+                comando.Connection = con;
+                comando.Connection.Open();
 
-
+                venta.Comentarios = "";
                 venta.IdUsuario = idUsuario;
+                venta.Id = InsertarVenta(venta);
+
                 foreach (Producto producto in productosVendidos)
                 {
-                    SqlCommand comando1 = new SqlCommand("INSERT INTO ProductoVendido ([Stock],[IdProducto],[IdVenta]) VALUES (@Stock, @IdProducto, @IdVenta)");
+                    ProductoVendido productoVendido = new ProductoVendido();
+                    productoVendido.Stock = producto.Stock;
+                    productoVendido.IdProducto = producto.Id;
+                    productoVendido.IdVenta = venta.Id;
 
-                    comando1.Parameters.AddWithValue("@Stock", producto.Stock);
-                    comando1.Parameters.AddWithValue("@IdProducto", producto.Id);
-                    comando1.Parameters.AddWithValue("@IdVenta", venta.Id);
+                    MetodosProductosVendidos.InsertarProductoVendido(productoVendido);
 
-                    comando1.ExecuteNonQuery();
-
-
-                    SqlCommand comando2 = new SqlCommand(" UPDATE Producto SET Stock = Stock - @Stock WHERE id = @IdProducto");
-
-                    comando2.Parameters.AddWithValue("@Stock", producto.Stock);
-                    comando2.Parameters.AddWithValue("@IdProducto", producto.Id);
-
-                    comando2.ExecuteNonQuery();
-
+                    MetodosProducto.ModificarStockProducto(productoVendido.IdProducto, productoVendido.Stock);
                 }
+            }
+        }
+
+        public static long InsertarVenta(Venta venta)
+        { 
+            using(SqlConnection con = new SqlConnection(conexion))
+            {
+                SqlCommand comando = new SqlCommand();
+                comando.Connection = con;
+                comando.Connection.Open();
+
+                comando.CommandText = @"INSERT INTO Venta ([Comentarios],[IdUsuario]) VALUES (@Comentarios,@IdUsuario)";
+                comando.Parameters.AddWithValue("@Comentarios", venta.Comentarios);
+                comando.Parameters.AddWithValue("@IdUsuario", venta.IdUsuario);
+                comando.ExecuteNonQuery();
+
+                comando.CommandText = "SELECT @@Identity";
+                long LastID = Convert.ToInt64(comando.ExecuteScalar());
+                comando.Connection.Close();
+
+                return LastID;
+               
+             
 
             }
 

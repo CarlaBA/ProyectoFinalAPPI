@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace APPI
 {
     public class ProductoVendido
@@ -13,8 +8,7 @@ namespace APPI
         private long idProducto;
         private long idVenta;
 
-        public ProductoVendido()
-        { }
+      
         public long Id { get => id; set => id = value; }
         public int Stock { get => stock; set => stock = value; }
         public long IdProducto { get => idProducto; set => idProducto = value; }

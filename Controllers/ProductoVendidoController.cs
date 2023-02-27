@@ -7,5 +7,12 @@ namespace APPI.Controllers
     [ApiController]
     public class ProductoVendidoController : ControllerBase
     {
+
+        [HttpGet("{idUsuario}")]
+        public List<Producto> GetProductoVendidoId(long idUsuario)
+        {
+            return MetodosProductosVendidos.ObtenerProductosVendidos(idUsuario);
+        }
+
     }
 }

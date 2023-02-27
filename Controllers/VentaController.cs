@@ -9,9 +9,15 @@ namespace APPI.Controllers
     {
 
         [HttpPost("{idUsuario}")]
-        public void PostVenta(List<Producto> productosVendidos, long idUsuario)
+        public void PostVenta(List<Producto> productos, long idUsuario)
         {
-            MetodosVenta.CargarVenta(productosVendidos, idUsuario);
+            MetodosVenta.CargarVenta(idUsuario, productos);
+        }
+
+        [HttpGet("{idUsuario}")]
+        public void GetVenta(long idUsuario)
+        {
+            MetodosVenta.TraerVentas(idUsuario);
         }
 
     }
